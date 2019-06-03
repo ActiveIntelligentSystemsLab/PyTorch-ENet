@@ -27,7 +27,7 @@ def get_arguments():
         "--batch-size",
         "-b",
         type=int,
-        default=10,
+        default=8,
         help="The batch size. Default: 10")
     parser.add_argument(
         "--epochs",
@@ -61,9 +61,9 @@ def get_arguments():
     # Dataset
     parser.add_argument(
         "--dataset",
-        choices=['camvid', 'cityscapes'],
-        default='camvid',
-        help="Dataset to use. Default: camvid")
+        choices=['camvid', 'cityscapes', 'greenhouse'],
+        default='greenhouse',
+        help="Dataset to use. Default: greenhouse")
     parser.add_argument(
         "--dataset-dir",
         type=str,
@@ -73,8 +73,8 @@ def get_arguments():
     parser.add_argument(
         "--height",
         type=int,
-        default=360,
-        help="The image height. Default: 360")
+        default=264,
+        help="The image height. Default: 264")
     parser.add_argument(
         "--width",
         type=int,
@@ -83,7 +83,7 @@ def get_arguments():
     parser.add_argument(
         "--weighing",
         choices=['enet', 'mfb', 'none'],
-        default='ENet',
+        default='enet',
         help="The class weighing technique to apply to the dataset. "
         "Default: enet")
     parser.add_argument(
