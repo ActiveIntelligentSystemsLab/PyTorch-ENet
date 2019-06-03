@@ -1,5 +1,5 @@
 ARGUMENTS
-batch_size: 10
+batch_size: 5
 dataset: camvid
 dataset_dir: ../../Datasets/CamVid/
 device: cuda

@@ -18,11 +18,15 @@ from args import get_arguments
 from data.utils import enet_weighing, median_freq_balancing
 import utils
 
+# For visualization using TensorBoardX
+from tensorboardX import SummaryWriter
+
 # Get the arguments
 args = get_arguments()
 
 device = torch.device(args.device)
 
+writer = SummaryWriter()
 
 def load_dataset(dataset):
     print("\nLoading dataset...\n")
@@ -188,6 +192,10 @@ def train(train_loader, val_loader, class_weights, class_encoding):
         lr_updater.step()
         epoch_loss, (iou, miou) = train.run_epoch(args.print_step)
 
+	# Visualization by TensorBoardX
+        writer.add_scalar('data/loss', epoch_loss, epoch)
+        writer.add_scalar('data/mean_IoU', miou, epoch)
+
         print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
               format(epoch, epoch_loss, miou))
 
@@ -210,6 +218,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
                 best_miou = miou
                 utils.save_checkpoint(model, optimizer, epoch + 1, best_miou,
                                       args)
+
 
     return model
 
@@ -321,3 +330,5 @@ if __name__ == '__main__':
         raise RuntimeError(
             "\"{0}\" is not a valid choice for execution mode.".format(
                 args.mode))
+
+    writer.close()
