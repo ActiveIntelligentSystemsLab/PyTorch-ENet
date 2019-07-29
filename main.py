@@ -193,16 +193,22 @@ def train(train_loader, val_loader, class_weights, class_encoding):
         epoch_loss, (iou, miou) = train.run_epoch(args.print_step)
 
 	# Visualization by TensorBoardX
-        writer.add_scalar('data/loss', epoch_loss, epoch)
-        writer.add_scalar('data/mean_IoU', miou, epoch)
+        writer.add_scalar('data/train/loss', epoch_loss, epoch)
+        writer.add_scalar('data/train/mean_IoU', miou, epoch)
+
+
 
         print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
               format(epoch, epoch_loss, miou))
 
-        if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
+        if (epoch + 1) % 1 == 0 or epoch + 1 == args.epochs:
             print(">>>> [Epoch: {0:d}] Validation".format(epoch))
 
             loss, (iou, miou) = val.run_epoch(args.print_step)
+
+      	    # Visualization by TensorBoardX
+            writer.add_scalar('data/val/loss', epoch_loss, epoch)
+            writer.add_scalar('data/val/mean_IoU', miou, epoch)
 
             print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
                   format(epoch, loss, miou))
@@ -219,6 +225,30 @@ def train(train_loader, val_loader, class_weights, class_encoding):
                 utils.save_checkpoint(model, optimizer, epoch + 1, best_miou,
                                       args)
 
+            # Visualization of the predicted batch in TensorBoard
+            for i, batch in enumerate(val_loader):
+                if i == 1:
+                    break
+
+                # Get the inputs and labels
+                inputs = batch[0].to(device)
+                labels = batch[1].to(device)
+
+                # Forward propagation
+                with torch.no_grad():
+                  predictions = model(inputs)
+
+                # Predictions is one-hot encoded with "num_classes" channels.
+                # Convert it to a single int using the indices where the maximum (1) occurs
+                _, predictions = torch.max(predictions.data, 1)
+              
+                label_to_rgb = transforms.Compose([
+                    ext_transforms.LongTensorToRGBPIL(class_encoding),
+                    transforms.ToTensor()
+                ])
+                color_predictions = utils.batch_transform(predictions.cpu(), label_to_rgb)
+
+                in_training_visualization(model, inputs, labels, class_encoding, writer, epoch, 'val')
 
     return model
 
@@ -280,6 +310,27 @@ def predict(model, images, class_encoding):
     color_predictions = utils.batch_transform(predictions.cpu(), label_to_rgb)
     utils.imshow_batch(images.data.cpu(), color_predictions)
 
+def in_training_visualization(model, images, labels, class_encoding, writer, epoch, data):
+    images = images.to(device)
+    labels = labels.to(device)
+
+    # Make predictions!
+    model.eval()
+    with torch.no_grad():
+        predictions = model(images)
+
+    # Predictions is one-hot encoded with "num_classes" channels.
+    # Convert it to a single int using the indices where the maximum (1) occurs
+    _, predictions = torch.max(predictions.data, 1)
+
+    label_to_rgb = transforms.Compose([
+        ext_transforms.LongTensorToRGBPIL(class_encoding),
+        transforms.ToTensor()
+    ])
+    color_predictions = utils.batch_transform(predictions.cpu(), label_to_rgb)
+    color_train       = utils.batch_transform(labels.data.cpu(), label_to_rgb)
+
+    utils.write_summary_batch(images.data.cpu(), color_train, color_predictions, writer, epoch, data) 
 
 # Run only if this module is being run directly
 if __name__ == '__main__':

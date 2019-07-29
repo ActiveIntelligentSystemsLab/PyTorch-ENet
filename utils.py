@@ -22,6 +22,16 @@ def batch_transform(batch, transform):
 
     return torch.stack(transf_slices)
 
+def write_summary_batch(images, train_labels, pred_labels, writer, epoch, data):
+    # Make a grid with the images and labels and convert it to numpy
+    images = torchvision.utils.make_grid(images).numpy()
+    train_labels = torchvision.utils.make_grid(train_labels).numpy()
+    pred_labels = torchvision.utils.make_grid(pred_labels).numpy()
+
+    writer.add_image(data + '/images', images, epoch)
+    writer.add_image(data + '/train_labels', train_labels, epoch)
+    writer.add_image(data + '/pred_labels', pred_labels, epoch)
+
 
 def imshow_batch(images, labels):
     """Displays two grids of images. The top grid displays ``images``
