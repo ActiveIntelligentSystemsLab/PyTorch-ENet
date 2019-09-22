@@ -207,7 +207,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
             loss, (iou, miou) = val.run_epoch(args.print_step)
 
       	    # Visualization by TensorBoardX
-            writer.add_scalar('data/val/loss', epoch_loss, epoch)
+            writer.add_scalar('data/val/loss', loss, epoch)
             writer.add_scalar('data/val/mean_IoU', miou, epoch)
 
             print(">>>> [Epoch: {0:d}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
