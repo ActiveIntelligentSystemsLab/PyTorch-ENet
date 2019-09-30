@@ -26,7 +26,7 @@ args = get_arguments()
 
 device = torch.device(args.device)
 
-writer = SummaryWriter()
+writer = SummaryWriter('/root/PyTorch-ENet/runs/')
 
 def load_dataset(dataset):
     print("\nLoading dataset...\n")
