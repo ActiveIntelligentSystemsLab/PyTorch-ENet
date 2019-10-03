@@ -114,3 +114,6 @@ venv.bak/
 
 runs/
 save/
+src/build/
+
+*.pt
